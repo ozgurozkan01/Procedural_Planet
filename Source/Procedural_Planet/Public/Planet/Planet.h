@@ -8,6 +8,8 @@
 
 class ATerrainFace;
 class UProceduralMeshComponent;
+class UColorConfig;
+class UShapeConfig;
 
 UCLASS()
 class PROCEDURAL_PLANET_API APlanet : public AActor
@@ -21,11 +23,18 @@ public:
 
 	void GeneratePlanet();
 	
+private:
 	TArray<ATerrainFace*> Faces;
-	
+
 	UPROPERTY(EditAnywhere, Category=Property)
-	UMaterial* Material;
+	UMaterialInterface* MaterialIntarface;
+	UPROPERTY(EditAnywhere, Category=Property)
+	UColorConfig* ColorConfig;
+	UPROPERTY(EditAnywhere, Category=Property)
+	UShapeConfig* ShapeConfig;
+
 	UPROPERTY(EditAnywhere, Category=Property, meta = (ClampMin = "2", ClampMax = "256", UIMin = "2", UIMax = "256"))
-	int Resolution;
-	int FaceAmount;
+	int Resolution = 2;
+	UPROPERTY(EditAnywhere, Category=Property, meta = (ClampMin = "2", ClampMax = "256", UIMin = "2", UIMax = "256"))
+	int FaceAmount = 6;
 };

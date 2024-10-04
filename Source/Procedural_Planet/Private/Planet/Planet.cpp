@@ -1,13 +1,11 @@
 #include "Planet/Planet.h"
+#include "Config/ColorConfig.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Planet/TerrainFace.h"
 
 APlanet::APlanet()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
-	FaceAmount = 6;
-	Resolution = 3;
 }
 
 void APlanet::BeginPlay()
@@ -17,22 +15,31 @@ void APlanet::BeginPlay()
 
 void APlanet::GeneratePlanet()
 {
-	TArray UpVectors = {
+	// UpVectors
+	TArray Directions =
+		{
 		FVector::ForwardVector,
 		FVector::BackwardVector,
 		FVector::LeftVector,
 		FVector::RightVector,
 		FVector::UpVector,
 		FVector::DownVector
-	};
+		};
 
+	// Planet Generation
 	for (int i = 0; i < FaceAmount; i++)
 	{
+		// Face Creation
 		ATerrainFace* TerrainFace = GetWorld()->SpawnActor<ATerrainFace>(ATerrainFace::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-		if (TerrainFace)
+		if (TerrainFace && MaterialIntarface)
 		{
+			UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(MaterialIntarface, this);
+
+			// Assign its root
 			TerrainFace->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-			TerrainFace->Initialize(Resolution, UpVectors[i], Material);
+			// İnitialize variables values
+			TerrainFace->Initialize(Resolution, Directions[i], ColorConfig->PlanetColor, DynamicMaterial);
+			// Generate just one face
 			TerrainFace->ConstructMesh();
 		}
 	}
