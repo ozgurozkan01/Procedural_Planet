@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Planet.generated.h"
 
+class UShapeGenerator;
 class ATerrainFace;
 class UProceduralMeshComponent;
 class UColorConfig;
@@ -22,19 +23,32 @@ public:
 	virtual void BeginPlay() override;
 
 	void GeneratePlanet();
-	
+	void Initialize();
+
+	void UpdateColor();
+	void GenerateColor();
+
+	void UpdateShape();
+	void GenerateMesh();
+
 private:
 	TArray<ATerrainFace*> Faces;
 
-	UPROPERTY(EditAnywhere, Category=Property)
+	// Edit
+	UPROPERTY(EditAnywhere, Category=Material)
 	UMaterialInterface* MaterialIntarface;
-	UPROPERTY(EditAnywhere, Category=Property)
+	UPROPERTY(EditAnywhere, Category=Material)
 	UColorConfig* ColorConfig;
-	UPROPERTY(EditAnywhere, Category=Property)
+	UPROPERTY(EditAnywhere, Category=Material)
 	UShapeConfig* ShapeConfig;
-
+	UPROPERTY(VisibleAnywhere, Category=Planet)
+	UShapeGenerator* ShapeGenerator;
+	// Visible
+	UPROPERTY(VisibleAnywhere, Category=Material)
+	UMaterialInstanceDynamic* DynamicMaterial;
+	
 	UPROPERTY(EditAnywhere, Category=Property, meta = (ClampMin = "2", ClampMax = "256", UIMin = "2", UIMax = "256"))
 	int Resolution = 2;
-	UPROPERTY(EditAnywhere, Category=Property, meta = (ClampMin = "2", ClampMax = "256", UIMin = "2", UIMax = "256"))
+	UPROPERTY(VisibleAnywhere, Category=Property, meta = (ClampMin = "2", ClampMax = "256", UIMin = "2", UIMax = "256"))
 	int FaceAmount = 6;
 };

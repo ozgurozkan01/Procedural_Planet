@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "TerrainFace.generated.h"
 
+class UShapeGenerator;
 class UProceduralMeshComponent;
 
 UCLASS()
@@ -16,15 +17,14 @@ class PROCEDURAL_PLANET_API ATerrainFace : public AActor
 public:	
 	ATerrainFace();
 	
-	void Initialize(int Res, FVector LocalUpVector, FColor MeshColor, UMaterialInstanceDynamic* DynamicMaterial);
+	void Initialize(UShapeGenerator* Generator, int Res, FVector LocalUpVector);
 	void ConstructMesh();
 	void RecalculateNormals(const TArray<FVector>& Vertices, const TArray<int32>& Triangles, TArray<FVector>& Normals);
-	
+
+	FORCEINLINE UProceduralMeshComponent* GetMesh() const { return Mesh; };
 private:
 	UPROPERTY(VisibleAnywhere, Category=Property)
-	UMaterialInstanceDynamic* DynamicMaterial;
-	UPROPERTY(VisibleAnywhere, Category=Property)
-	FColor Color;
+	UShapeGenerator* ShapeGenerator;	
 	UPROPERTY(VisibleAnywhere, Category=Property)
 	UProceduralMeshComponent* Mesh;
 	UPROPERTY(VisibleAnywhere, Category=Property)

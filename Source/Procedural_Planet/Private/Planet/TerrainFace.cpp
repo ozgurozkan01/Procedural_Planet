@@ -2,6 +2,7 @@
 
 #include "Planet/TerrainFace.h"
 #include "ProceduralMeshComponent.h"
+#include "Planet/ShapeGenerator.h"
 
 ATerrainFace::ATerrainFace()
 {
@@ -11,10 +12,9 @@ ATerrainFace::ATerrainFace()
 	RootComponent = Mesh;
 }
 
-void ATerrainFace::Initialize(int Res, FVector LocalUpVector, FColor MeshColor, UMaterialInstanceDynamic* MeshMaterial)
+void ATerrainFace::Initialize(UShapeGenerator* Generator, int Res, FVector LocalUpVector)
 {
-    DynamicMaterial = MeshMaterial;
-	Color = MeshColor;
+    ShapeGenerator = Generator;
 	Resolution = Res; 
 	LocalUp = LocalUpVector;
     AxisA = FVector(LocalUp.Y, LocalUp.Z, LocalUp.X);
@@ -24,6 +24,8 @@ void ATerrainFace::Initialize(int Res, FVector LocalUpVector, FColor MeshColor, 
 
 void ATerrainFace::ConstructMesh()
 {
+    if (ShapeGenerator == nullptr) { return; }
+    
     // Containers to construct mesh
     TArray<FVector>          Vertices;  Vertices.SetNum(Resolution * Resolution);
     TArray<int32>            Triangles; Triangles.SetNum((Resolution - 1) * (Resolution - 1) * 6);
@@ -40,9 +42,9 @@ void ATerrainFace::ConstructMesh()
             // Represents the 3D point calculated on the surface of the cube based on the normalized grid coordinates.
             FVector PointOnUnitCube = LocalUp + (Percent.X - 0.5f) * 2 * AxisA + (Percent.Y - 0.5f) * 2 * AxisB;
             // Arranging shading better, multiply by minus 1 normalized vector.
-            FVector PointOnUnitSphere = -PointOnUnitCube.GetSafeNormal() * Size;
+            FVector PointOnUnitSphere = -PointOnUnitCube.GetSafeNormal();
 
-            Vertices[Index] = PointOnUnitSphere;
+            Vertices[Index] = ShapeGenerator->CalculatePointOnPlanet(PointOnUnitSphere);
 
             if (X != Resolution - 1 && Y != Resolution - 1)
             {
@@ -62,9 +64,6 @@ void ATerrainFace::ConstructMesh()
     Mesh->ClearMeshSection(0);
     RecalculateNormals(Vertices, Triangles, Normals);
     Mesh->CreateMeshSection(0, Vertices, Triangles, Normals, TArray<FVector2D>(), TArray<FColor>(), Tangents, true);
-    // Mesh Color Set
-    DynamicMaterial->SetVectorParameterValue(TEXT("BaseColor"), FLinearColor(Color));
-    Mesh->SetMaterial(0, DynamicMaterial);
 }
 
 void ATerrainFace::RecalculateNormals(const TArray<FVector>& Vertices, const TArray<int32>& Triangles, TArray<FVector>& Normals)
