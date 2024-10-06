@@ -8,6 +8,8 @@
 #include "ShapeGenerator.generated.h"
 
 
+class UNoiseFilter;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROCEDURAL_PLANET_API UShapeGenerator : public UActorComponent
 {
@@ -16,15 +18,12 @@ class PROCEDURAL_PLANET_API UShapeGenerator : public UActorComponent
 public:	
 	UShapeGenerator();
 
-protected:
-	virtual void BeginPlay() override;
-public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
 	void Initialize(UShapeConfig* Config);
-	FORCEINLINE FVector CalculatePointOnPlanet(FVector PointOnUnitSphere) const { return PointOnUnitSphere * ShapeConfig->PlanetRadius; };
-
+	FVector CalculatePointOnPlanet(FVector PointOnUnitSphere);
+	UPROPERTY(EditAnywhere, Category=Config)
+	TArray<INoiseFilterInterface*> NoiseFilters;
 private:
-	UPROPERTY(EditDefaultsOnly, Category=Config)
+	UPROPERTY(EditAnywhere, Category=Config)
 	UShapeConfig* ShapeConfig;
+
 };

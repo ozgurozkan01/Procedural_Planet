@@ -35,6 +35,4 @@ private:
 	FVector AxisB;
 	UPROPERTY(VisibleAnywhere, Category=Property)
 	int Resolution;
-	UPROPERTY(VisibleAnywhere, Category=Property)
-	int Size;
 };

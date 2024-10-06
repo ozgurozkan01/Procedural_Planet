@@ -11,7 +11,23 @@ APlanet::APlanet()
 	PrimaryActorTick.bCanEverTick = false;
 
 	ShapeGenerator = CreateDefaultSubobject<UShapeGenerator>(TEXT("ShapeGenerator"));
-	
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> InterfaceMat(TEXT("/Script/Engine.Material'/Game/Material/MAT_Planet.MAT_Planet'"));
+	static ConstructorHelpers::FObjectFinder<UColorConfig> ColorConf(TEXT("/Script/Procedural_Planet.ColorConfig'/Game/DataAsset/Color/DA_ColorConfig.DA_ColorConfig'"));
+	static ConstructorHelpers::FObjectFinder<UShapeConfig> ShapeConf(TEXT("/Script/Procedural_Planet.ShapeConfig'/Game/DataAsset/Shape/DA_ShapeConfig.DA_ShapeConfig'"));
+
+	if (InterfaceMat.Succeeded())
+	{
+		MaterialIntarface = InterfaceMat.Object;
+	}
+	if (ColorConf.Succeeded())
+	{
+		ColorConfig = ColorConf.Object;
+	}
+	if (ShapeConf.Succeeded())
+	{
+		ShapeConfig = ShapeConf.Object;
+	}
 }
 
 void APlanet::BeginPlay()
@@ -20,11 +36,10 @@ void APlanet::BeginPlay()
 	{
 		DynamicMaterial = UMaterialInstanceDynamic::Create(MaterialIntarface, this);
 	}
-	if (ShapeConfig)
+	if (ShapeConfig && ShapeGenerator)
 	{
 		ShapeGenerator->Initialize(ShapeConfig);
 	}
-	
 	GeneratePlanet();
 }
 

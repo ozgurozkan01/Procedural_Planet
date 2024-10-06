@@ -15,11 +15,10 @@ ATerrainFace::ATerrainFace()
 void ATerrainFace::Initialize(UShapeGenerator* Generator, int Res, FVector LocalUpVector)
 {
     ShapeGenerator = Generator;
-	Resolution = Res; 
-	LocalUp = LocalUpVector;
-    AxisA = FVector(LocalUp.Y, LocalUp.Z, LocalUp.X);
-	AxisB = FVector::CrossProduct(LocalUp, AxisA);
-    Size = 100;
+	Resolution = Res; // Face Amount in 1 line
+	LocalUp = LocalUpVector; // Vector through the up from the face
+    AxisA = FVector(LocalUp.Y, LocalUp.Z, LocalUp.X); // Perpendicular Vector component of LocalUp
+	AxisB = FVector::CrossProduct(LocalUp, AxisA); // Perpendicular Vector component of LocalUpf
 }
 
 void ATerrainFace::ConstructMesh()
@@ -43,7 +42,9 @@ void ATerrainFace::ConstructMesh()
             FVector PointOnUnitCube = LocalUp + (Percent.X - 0.5f) * 2 * AxisA + (Percent.Y - 0.5f) * 2 * AxisB;
             // Arranging shading better, multiply by minus 1 normalized vector.
             FVector PointOnUnitSphere = -PointOnUnitCube.GetSafeNormal();
-
+            // It is used for generate a point on planet.
+            // PointOnUnitSphere is not the right one because we want to planet which does not have the flat surface.
+            // We are gonna create a uneven surface.
             Vertices[Index] = ShapeGenerator->CalculatePointOnPlanet(PointOnUnitSphere);
 
             if (X != Resolution - 1 && Y != Resolution - 1)
@@ -62,6 +63,7 @@ void ATerrainFace::ConstructMesh()
 
     // Mesh Creation
     Mesh->ClearMeshSection(0);
+    // Calculate Normals for shading.Because Unreal Engine does not make this already.
     RecalculateNormals(Vertices, Triangles, Normals);
     Mesh->CreateMeshSection(0, Vertices, Triangles, Normals, TArray<FVector2D>(), TArray<FColor>(), Tangents, true);
 }
@@ -71,6 +73,7 @@ void ATerrainFace::RecalculateNormals(const TArray<FVector>& Vertices, const TAr
     Normals.SetNum(Vertices.Num());
     for (int32 i = 0; i < Normals.Num(); i++)
     {
+        // All vectors are zerod out, because we need the value itself.
         Normals[i] = FVector::ZeroVector;
     }
 

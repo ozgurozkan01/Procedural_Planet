@@ -30,16 +30,14 @@ public:
 
 	void UpdateShape();
 	void GenerateMesh();
-
 private:
 	TArray<ATerrainFace*> Faces;
-
 	// Edit
-	UPROPERTY(EditAnywhere, Category=Material)
+	UPROPERTY(VisibleAnywhere, Category=Material)
 	UMaterialInterface* MaterialIntarface;
-	UPROPERTY(EditAnywhere, Category=Material)
+	UPROPERTY(VisibleAnywhere, Category=Material)
 	UColorConfig* ColorConfig;
-	UPROPERTY(EditAnywhere, Category=Material)
+	UPROPERTY(VisibleAnywhere, Category=Material)
 	UShapeConfig* ShapeConfig;
 	UPROPERTY(VisibleAnywhere, Category=Planet)
 	UShapeGenerator* ShapeGenerator;
