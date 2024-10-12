@@ -2,10 +2,7 @@
 
 
 #include "Planet/ShapeGenerator.h"
-#include "Components/ActorComponent.h" // For UActorComponent
 #include "Noise/NoiseFilterFactory.h"
-#include "Noise/SimpleNoiseFilter.h"
-#include "Noise/RidgidNoiseFilter.h"
 
 UShapeGenerator::UShapeGenerator()
 {
@@ -14,20 +11,21 @@ UShapeGenerator::UShapeGenerator()
 
 void UShapeGenerator::Initialize(UShapeConfig* Config)
 {
-	if (Config == nullptr) { UE_LOG(LogTemp, Warning, TEXT("Config is null")); return; }
-	
-	ShapeConfig = Config;
-	NoiseFilters.SetNum(Config->NoiseLayers.Num());
-
-	for (int Index = 0; Index < NoiseFilters.Num(); Index++)
+	if (Config)
 	{
-		auto NoiseFilter = UNoiseFilterFactory::CreateNoiseFilter(ShapeConfig->NoiseLayers[Index].NoiseSettings);
-		
-		if (NoiseFilter)
+		ShapeConfig = Config;
+		NoiseFilters.SetNum(Config->NoiseLayers.Num());
+
+		for (int Index = 0; Index < NoiseFilters.Num(); Index++)
 		{
-			NoiseFilter->Initialize(ShapeConfig->NoiseLayers[Index].NoiseSettings);
-			NoiseFilters[Index] = NoiseFilter;
-		}
+			auto NoiseFilter = UNoiseFilterFactory::CreateNoiseFilter(ShapeConfig->NoiseLayers[Index].NoiseSettings);
+		
+			if (NoiseFilter)
+			{
+				NoiseFilter->Initialize(ShapeConfig->NoiseLayers[Index].NoiseSettings);
+				NoiseFilters[Index] = NoiseFilter;
+			}
+		}	
 	}
 }
 
@@ -54,6 +52,8 @@ FVector UShapeGenerator::CalculatePointOnPlanet(FVector PointOnUnitSphere)
 			Elevation += NoiseFilters[Index]->Evaluate(PointOnUnitSphere) * MaskValue;
 		}
 	}
-	
-	return PointOnUnitSphere * ShapeConfig->PlanetRadius * (1 + Elevation);
+
+	Elevation = ShapeConfig->PlanetRadius * (1 + Elevation);
+	MinMaxFinder.FindMinAndMax(Elevation);
+	return PointOnUnitSphere * Elevation;
 }

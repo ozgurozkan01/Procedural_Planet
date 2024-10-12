@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Config/MinMaxFinder.h"
 #include "Config/ShapeConfig.h"
 #include "ShapeGenerator.generated.h"
-
 
 class UNoiseFilter;
 
@@ -22,8 +22,10 @@ public:
 	FVector CalculatePointOnPlanet(FVector PointOnUnitSphere);
 	UPROPERTY(EditAnywhere, Category=Config)
 	TArray<INoiseFilterInterface*> NoiseFilters;
+
+	UPROPERTY(EditAnywhere, Category=Config)
+	FMinMaxFinder MinMaxFinder;
 private:
 	UPROPERTY(EditAnywhere, Category=Config)
 	UShapeConfig* ShapeConfig;
-
 };

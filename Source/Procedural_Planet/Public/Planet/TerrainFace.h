@@ -20,7 +20,8 @@ public:
 	void Initialize(UShapeGenerator* Generator, int Res, FVector LocalUpVector);
 	void ConstructMesh();
 	void RecalculateNormals(const TArray<FVector>& Vertices, const TArray<int32>& Triangles, TArray<FVector>& Normals);
-
+	void CalculateVertexColor(TArray<FColor>& Colors, TArray<FVector>& Vertices);
+	
 	FORCEINLINE UProceduralMeshComponent* GetMesh() const { return Mesh; };
 private:
 	UPROPERTY(VisibleAnywhere, Category=Property)

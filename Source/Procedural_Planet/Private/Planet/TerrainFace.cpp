@@ -24,32 +24,37 @@ void ATerrainFace::Initialize(UShapeGenerator* Generator, int Res, FVector Local
 void ATerrainFace::ConstructMesh()
 {
     if (ShapeGenerator == nullptr) { return; }
-    
+
     // Containers to construct mesh
-    TArray<FVector>          Vertices;  Vertices.SetNum(Resolution * Resolution);
-    TArray<int32>            Triangles; Triangles.SetNum((Resolution - 1) * (Resolution - 1) * 6);
-    TArray<FVector>          Normals;   Normals.SetNum(Vertices.Num());
-    TArray<FProcMeshTangent> Tangents;  Tangents.SetNum(Vertices.Num());
-    
+    TArray<FVector>          Vertices;    Vertices.SetNum(Resolution * Resolution);
+    TArray<int32>            Triangles;   Triangles.SetNum((Resolution - 1) * (Resolution - 1) * 6);
+    TArray<FVector>          Normals;     Normals.SetNum(Vertices.Num());
+    TArray<FProcMeshTangent> Tangents;    Tangents.SetNum(Vertices.Num());
+    TArray<FVector2D>        UVs;         UVs.SetNum(Vertices.Num());  // UVs array
+    TArray<FColor>           VertexColors; VertexColors.SetNum(Vertices.Num()); // Vertex colors array
+
     for (int Y = 0; Y < Resolution; Y++)
     {
         for (int X = 0; X < Resolution; X++)
         {
             int Index = X + Y * Resolution;
-            // Represents the normalized (between 0 and 1) coordinates of a point on the grid along the X and Y axes.
+
+            // Calculate UV coordinates
+            FVector2D UV = FVector2D(static_cast<float>(X) / (Resolution - 1), static_cast<float>(Y) / (Resolution - 1));
+            UVs[Index] = UV; // Assign UV coordinate
+
+            // Calculate position on the cube and then on the planet
             FVector2D Percent = FVector2D(X, Y) / (Resolution - 1);
-            // Represents the 3D point calculated on the surface of the cube based on the normalized grid coordinates.
             FVector PointOnUnitCube = LocalUp + (Percent.X - 0.5f) * 2 * AxisA + (Percent.Y - 0.5f) * 2 * AxisB;
-            // Arranging shading better, multiply by minus 1 normalized vector.
             FVector PointOnUnitSphere = -PointOnUnitCube.GetSafeNormal();
-            // It is used for generate a point on planet.
-            // PointOnUnitSphere is not the right one because we want to planet which does not have the flat surface.
-            // We are gonna create a uneven surface.
             Vertices[Index] = ShapeGenerator->CalculatePointOnPlanet(PointOnUnitSphere);
+
+            // Assign colors based on the position or other criteria
+            // Example: Gradient color based on Y position
+            //VertexColors[Index] = FColor(Index , 0, 0, 255);
 
             if (X != Resolution - 1 && Y != Resolution - 1)
             {
-                // Assign the triangle points accordingly clockwise. 
                 Triangles.Add(Index);
                 Triangles.Add(Index + Resolution + 1);
                 Triangles.Add(Index + Resolution);
@@ -63,9 +68,10 @@ void ATerrainFace::ConstructMesh()
 
     // Mesh Creation
     Mesh->ClearMeshSection(0);
-    // Calculate Normals for shading.Because Unreal Engine does not make this already.
     RecalculateNormals(Vertices, Triangles, Normals);
-    Mesh->CreateMeshSection(0, Vertices, Triangles, Normals, TArray<FVector2D>(), TArray<FColor>(), Tangents, true);
+    
+    // Create mesh section with UVs and vertex colors
+    Mesh->CreateMeshSection(0, Vertices, Triangles, Normals, UVs, VertexColors, Tangents, true);
 }
 
 void ATerrainFace::RecalculateNormals(const TArray<FVector>& Vertices, const TArray<int32>& Triangles, TArray<FVector>& Normals)
@@ -104,3 +110,8 @@ void ATerrainFace::RecalculateNormals(const TArray<FVector>& Vertices, const TAr
         Normals[i] = -Normals[i].GetSafeNormal();
     }
 }
+
+void ATerrainFace::CalculateVertexColor(TArray<FColor>& Colors, TArray<FVector>& Vertices)
+{
+}
+

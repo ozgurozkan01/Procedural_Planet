@@ -3,23 +3,22 @@
 #include "ProceduralMeshComponent.h"
 #include "Config/ColorConfig.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Planet/ColorGenerator.h"
 #include "Planet/ShapeGenerator.h"
 #include "Planet/TerrainFace.h"
 
-APlanet::APlanet()
+APlanet::APlanet() :
+	Resolution(2),
+	FaceAmount(6)
 {
 	PrimaryActorTick.bCanEverTick = false;
 
 	ShapeGenerator = CreateDefaultSubobject<UShapeGenerator>(TEXT("ShapeGenerator"));
+	ColorGenerator = CreateDefaultSubobject<UColorGenerator>(TEXT("ColorGenerator"));
 
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> InterfaceMat(TEXT("/Script/Engine.Material'/Game/Material/MAT_Planet.MAT_Planet'"));
 	static ConstructorHelpers::FObjectFinder<UColorConfig> ColorConf(TEXT("/Script/Procedural_Planet.ColorConfig'/Game/DataAsset/Color/DA_ColorConfig.DA_ColorConfig'"));
 	static ConstructorHelpers::FObjectFinder<UShapeConfig> ShapeConf(TEXT("/Script/Procedural_Planet.ShapeConfig'/Game/DataAsset/Shape/DA_ShapeConfig.DA_ShapeConfig'"));
 
-	if (InterfaceMat.Succeeded())
-	{
-		MaterialIntarface = InterfaceMat.Object;
-	}
 	if (ColorConf.Succeeded())
 	{
 		ColorConfig = ColorConf.Object;
@@ -32,13 +31,21 @@ APlanet::APlanet()
 
 void APlanet::BeginPlay()
 {
-	if (MaterialIntarface)
+	if (ColorConfig && ColorConfig->MaterialInterface)
 	{
-		DynamicMaterial = UMaterialInstanceDynamic::Create(MaterialIntarface, this);
+		DynamicMaterial = UMaterialInstanceDynamic::Create(ColorConfig->MaterialInterface, this);
+		if (DynamicMaterial)
+		{
+			ColorConfig->DynamicMaterial = DynamicMaterial;
+		}
 	}
 	if (ShapeConfig && ShapeGenerator)
 	{
 		ShapeGenerator->Initialize(ShapeConfig);
+	}
+	if (ColorConfig && ColorGenerator)
+	{
+		ColorGenerator->Initialize(ColorConfig);
 	}
 	GeneratePlanet();
 }
@@ -68,7 +75,7 @@ void APlanet::Initialize()
 	{
 		// Face Creation
 		ATerrainFace* TerrainFace = GetWorld()->SpawnActor<ATerrainFace>(ATerrainFace::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-		if (TerrainFace && MaterialIntarface)
+		if (TerrainFace)
 		{
 			TerrainFace->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 			// Initialize variables values
@@ -98,14 +105,20 @@ void APlanet::GenerateMesh()
 	{
 		Faces[i]->ConstructMesh();
 	}
+
+	if (ColorGenerator && ShapeGenerator)
+	{
+		ColorGenerator->UpdateElevation(ShapeGenerator->MinMaxFinder);
+	}
 }
 
 void APlanet::GenerateColor()
 {
-	for (auto Face : Faces)
+	if (ColorConfig && ColorConfig->DynamicMaterial)
 	{
-		// Mesh Color Set
-		DynamicMaterial->SetVectorParameterValue(TEXT("BaseColor"), ColorConfig->PlanetColor);
-		Face->GetMesh()->SetMaterial(0, DynamicMaterial);
+		for (auto Face : Faces)
+		{
+			Face->GetMesh()->SetMaterial(0, ColorConfig->DynamicMaterial);
+		}	
 	}
 }

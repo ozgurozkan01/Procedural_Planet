@@ -17,4 +17,9 @@ class PROCEDURAL_PLANET_API UColorConfig : public UDataAsset
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Data)
 	FColor PlanetColor;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category=Data)
+	UMaterialInterface* MaterialInterface;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Data)
+	UMaterialInstanceDynamic* DynamicMaterial;
 };
+	
