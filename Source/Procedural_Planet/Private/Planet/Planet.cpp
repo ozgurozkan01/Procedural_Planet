@@ -47,6 +47,7 @@ void APlanet::BeginPlay()
 	{
 		ColorGenerator->Initialize(ColorConfig);
 	}
+	
 	GeneratePlanet();
 }
 
@@ -82,6 +83,8 @@ void APlanet::Initialize()
 			TerrainFace->Initialize(ShapeGenerator, Resolution, Directions[i]);
 			// Add face into the buffer.
 			Faces.Add(TerrainFace);
+
+			UE_LOG(LogTemp, Warning, TEXT("%f"), (GetActorLocation() - TerrainFace->GetActorLocation()).Length());
 		}
 	}
 }
@@ -103,13 +106,19 @@ void APlanet::GenerateMesh()
 {
 	for (int i = 0; i < FaceAmount; i++)
 	{
-		Faces[i]->ConstructMesh();
+		Faces[i]->CalculateMeshComponents();
 	}
 
+	for (int i = 0; i < FaceAmount; i++)
+	{
+		Faces[i]->CalculateVertexColor(ShapeGenerator->MinMaxFinder.MinPointOnPlanet, ShapeGenerator->MinMaxFinder.MaxPointOnPlanet);
+		Faces[i]->ConstructMesh();
+	}
+	/*
 	if (ColorGenerator && ShapeGenerator)
 	{
 		ColorGenerator->UpdateElevation(ShapeGenerator->MinMaxFinder);
-	}
+	}*/
 }
 
 void APlanet::GenerateColor()

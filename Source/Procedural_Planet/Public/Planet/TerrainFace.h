@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ProceduralMeshComponent.h"
 #include "TerrainFace.generated.h"
 
 class UShapeGenerator;
@@ -19,11 +20,20 @@ public:
 	
 	void Initialize(UShapeGenerator* Generator, int Res, FVector LocalUpVector);
 	void ConstructMesh();
-	void RecalculateNormals(const TArray<FVector>& Vertices, const TArray<int32>& Triangles, TArray<FVector>& Normals);
-	void CalculateVertexColor(TArray<FColor>& Colors, TArray<FVector>& Vertices);
+	void RecalculateNormals();
+	void CalculateMeshComponents();
+	void CalculateVertexColor(const float& Min, const float& Max);
 	
 	FORCEINLINE UProceduralMeshComponent* GetMesh() const { return Mesh; };
 private:
+	// Containers to construct mesh
+	TArray<FVector>          Vertices;
+	TArray<int32>            Triangles;
+	TArray<FVector>          Normals;
+	TArray<FProcMeshTangent> Tangents;
+	TArray<FVector2D>        UVs;
+	TArray<FColor>           VertexColors;
+	
 	UPROPERTY(VisibleAnywhere, Category=Property)
 	UShapeGenerator* ShapeGenerator;	
 	UPROPERTY(VisibleAnywhere, Category=Property)

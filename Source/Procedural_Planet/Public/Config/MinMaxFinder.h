@@ -8,12 +8,16 @@ struct FMinMaxFinder
 {
 	GENERATED_BODY()
 
-	FMinMaxFinder() {}
+	FMinMaxFinder()
+	{
+		MinPointOnPlanet = FLT_MAX;
+		MaxPointOnPlanet = -FLT_MAX;
+	}
 	
 	UPROPERTY(VisibleAnywhere, Category=MinMax)
-	float MinPointOnPlanet = FLT_MAX;
+	float MinPointOnPlanet;
 	UPROPERTY(VisibleAnywhere, Category=MinMax)
-	float MaxPointOnPlanet = FLT_MIN;	
+	float MaxPointOnPlanet;	
 
 	void FindMinAndMax(float Value)
 	{
